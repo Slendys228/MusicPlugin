@@ -7,9 +7,11 @@ namespace MusicPlugin
     public class MusicHandler : MonoBehaviour
     {
         private static GameObject IntroObject;
+        private string musicFilePath = Directory.GetCurrentDirectory().Replace("\\", "/") + "/Plugins/MusicPlugin/mainmusic.mp3";
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
+            Debug.Log(musicFilePath);
         }
         private void Start()
         {
@@ -26,9 +28,9 @@ namespace MusicPlugin
         }
         private IEnumerator LoadAndPlayAudioCoroutine(AudioSource audioSource)
         {
-            if (File.Exists("C:/Program Files (x86)/Steam/steamapps/common/Content Warning/Plugins/MusicPlugin/mainmusic.mp3"))
+            if (File.Exists(musicFilePath))
             {
-                using (var www = new WWW("file:///" + "C:/Program Files (x86)/Steam/steamapps/common/Content Warning/Plugins/MusicPlugin/mainmusic.mp3"))
+                using (var www = new WWW("file:///" + musicFilePath))
                 {
                     yield return www;
 
@@ -49,7 +51,7 @@ namespace MusicPlugin
             }
         }
     }
-    [ContentWarningPlugin("MusicPlugin", "0.1", false)]
+    [ContentWarningPlugin("MusicPlugin", "1.1", false)]
     public class PluginTy
     {
         static PluginTy()
