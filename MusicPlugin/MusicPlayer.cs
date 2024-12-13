@@ -7,11 +7,16 @@ namespace MusicPlugin
     public class MusicHandler : MonoBehaviour
     {
         private static GameObject IntroObject;
-        private string musicFilePath = Directory.GetCurrentDirectory().Replace("\\", "/") + "/Plugins/MusicPlugin/mainmusic.mp3";
+        private static string playerMusicPath = Directory.GetCurrentDirectory().Replace("\\", "/") + "/Plugins/MusicPlugin/Music";
+        private string musicPath = Directory.GetCurrentDirectory().Replace("\\", "/") + "/Plugins/MusicPlugin/";
+        private string[] musicList;
+        private AudioSource musicSource;
+        private Vector2 scrollPosition;
+        private bool viewPlayer = false;
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
-            Debug.Log(musicFilePath);
+            Debug.Log(musicPath);
         }
         private void Start()
         {
@@ -21,16 +26,58 @@ namespace MusicPlugin
                 IntroObject.GetComponent<AudioSource>().loop = true;
                 LoadAndPlayAudio(IntroObject.GetComponent<AudioSource>());
             }
+            if (Directory.Exists(playerMusicPath))
+            {
+                musicSource = gameObject.AddComponent<AudioSource>();
+                musicList = Directory.GetFiles(playerMusicPath);
+            }
         }
-        public void LoadAndPlayAudio(AudioSource _audioSource)
+        private void OnGUI()
+        {
+            if (GUILayout.Button("View Player"))
+            {
+                viewPlayer = !viewPlayer;
+            }
+            if (viewPlayer)
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                GUILayout.BeginArea(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 100, 300, 200));
+                GUILayout.BeginVertical("box");
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(300), GUILayout.Height(150));
+                if (musicList != null)
+                {
+                    GUILayout.Box($"Volume: {musicSource.volume}");
+                    foreach (var Music in musicList)
+                    {
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Box(Path.GetFileName(Music));
+                        if (GUILayout.Button("Play"))
+                        {
+                            gameObject.GetComponent<MusicHandler>().LoadAndPlayAudio(musicSource, Music);
+                        }
+                        GUILayout.EndHorizontal();
+                    }
+                }
+                GUILayout.EndScrollView();
+                musicSource.volume = GUILayout.HorizontalSlider(musicSource.volume, 0, 1);
+                if (GUILayout.Button("Stop"))
+                {
+                    musicSource.Stop();
+                }
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
+            }
+        }
+        public void LoadAndPlayAudio(AudioSource _audioSource, string FileName = "mainmusic.mp3")
         {
             StartCoroutine(LoadAndPlayAudioCoroutine(_audioSource));
         }
-        private IEnumerator LoadAndPlayAudioCoroutine(AudioSource audioSource)
+        private IEnumerator LoadAndPlayAudioCoroutine(AudioSource audioSource, string FileName = "mainmusic.mp3")
         {
-            if (File.Exists(musicFilePath))
+            if (File.Exists(musicPath + FileName))
             {
-                using (var www = new WWW("file:///" + musicFilePath))
+                using (var www = new WWW("file:///" + musicPath + FileName))
                 {
                     yield return www;
 
@@ -51,12 +98,12 @@ namespace MusicPlugin
             }
         }
     }
-    [ContentWarningPlugin("MusicPlugin", "1.1", false)]
+    [ContentWarningPlugin("MusicPlugin", "1.2", false)]
     public class PluginTy
     {
         static PluginTy()
         {
-            Debug.Log("Hello from MusicPlugin! This is called on plugin load");
+            Debug.Log("MusicPlugin load.");
         }
     }
     [HarmonyPatch(typeof(IntroScreenAnimator))]
