@@ -98,7 +98,7 @@ namespace MusicPlugin
             }
         }
     }
-    [ContentWarningPlugin("MusicPlugin", "1.2", false)]
+    [ContentWarningPlugin("MusicPlugin", "1.2.1", false)]
     public class PluginTy
     {
         static PluginTy()
