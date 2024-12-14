@@ -6,12 +6,12 @@ namespace MusicPlugin
 {
     public class MusicHandler : MonoBehaviour
     {
-        private static string playerMusicPath = Directory.GetCurrentDirectory().Replace("\\", "/") + "/Plugins/MusicPlugin/Music";
+        private static string playerMusicPath = Directory.GetCurrentDirectory().Replace("\\", "/") + "/Plugins/MusicPlugin/Music/";
         private string musicPath = Directory.GetCurrentDirectory().Replace("\\", "/") + "/Plugins/MusicPlugin/";
-        private string[] musicList;
+        private string[]? musicList;
         private string musicName = "None";
-        private string musicUrl;
-        private AudioSource musicSource;
+        private string? musicUrl;
+        private AudioSource? musicSource;
         private Vector2 scrollPosition;
         private bool viewPlayer = false;
         private void Awake()
@@ -25,12 +25,16 @@ namespace MusicPlugin
             if (IntroObject)
             {
                 IntroObject.GetComponent<AudioSource>().loop = true;
-                LoadAndPlayAudio(IntroObject.GetComponent<AudioSource>());
+                LoadAndPlayAudio(IntroObject.GetComponent<AudioSource>(), null);
             }
-            if (Directory.Exists(playerMusicPath))
+            if (Directory.Exists(musicPath))
             {
                 musicSource = gameObject.AddComponent<AudioSource>();
                 musicList = Directory.GetFiles(playerMusicPath);
+                foreach (var Name in musicList)
+                {
+                    Debug.Log(Name);
+                }
             }
         }
         private void OnGUI()
@@ -55,8 +59,8 @@ namespace MusicPlugin
                         GUILayout.Box(Path.GetFileName(Music));
                         if (GUILayout.Button("Play"))
                         {
-                            gameObject.GetComponent<MusicHandler>().LoadAndPlayAudio(musicSource, Music);
                             musicName = Path.GetFileName(Music);
+                            gameObject.GetComponent<MusicHandler>().LoadAndPlayAudio(musicSource, playerMusicPath, musicName);
                         }
                         GUILayout.EndHorizontal();
                     }
@@ -78,9 +82,9 @@ namespace MusicPlugin
                 GUILayout.EndArea();
             }
         }
-        public void LoadAndPlayAudio(AudioSource _audioSource, string FileName = "mainmusic.mp3")
+        public void LoadAndPlayAudio(AudioSource _audioSource, string? path, string FileName = "mainmusic.mp3")
         {
-            StartCoroutine(LoadAndPlayAudioCoroutine(_audioSource));
+            StartCoroutine(LoadAndPlayAudioCoroutine(_audioSource, path, FileName));
         }
         public void LoadAndPlayUrl(AudioSource _audioSource, string _URL)
         {
@@ -103,11 +107,12 @@ namespace MusicPlugin
                 }
             }
         }
-        private IEnumerator LoadAndPlayAudioCoroutine(AudioSource audioSource, string FileName = "mainmusic.mp3")
+        private IEnumerator LoadAndPlayAudioCoroutine(AudioSource audioSource, string path, string FileName = "mainmusic.mp3")
         {
-            if (File.Exists(musicPath + FileName))
+            path ??= musicPath;
+            if (File.Exists(path + FileName))
             {
-                using (var www = new WWW("file:///" + musicPath + FileName))
+                using (var www = new WWW("file:///" + path + FileName))
                 {
                     yield return www;
 
@@ -128,7 +133,7 @@ namespace MusicPlugin
             }
         }
     }
-    [ContentWarningPlugin("MusicPlugin", "2.0", false)]
+    [ContentWarningPlugin("MusicPlugin", "2.0.1", false)]
     public class PluginTy
     {
         static PluginTy()
