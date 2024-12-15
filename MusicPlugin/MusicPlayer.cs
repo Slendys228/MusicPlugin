@@ -70,6 +70,7 @@ namespace MusicPlugin
                 musicSource.volume = GUILayout.HorizontalSlider(musicSource.volume, 0, 1);
                 if (GUILayout.Button("Load by URL"))
                 {
+                    musicSource.Stop();
                     LoadAndPlayUrl(musicSource, musicUrl);
                     musicName = Path.GetFileName(Path.GetFileName(musicUrl));
                 }
@@ -133,7 +134,7 @@ namespace MusicPlugin
             }
         }
     }
-    [ContentWarningPlugin("MusicPlugin", "2.0.1", false)]
+    [ContentWarningPlugin("MusicPlugin", "2.0.2", false)]
     public class PluginTy
     {
         static PluginTy()
